@@ -2,7 +2,7 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 clear
 #=================================================
-#   Description: Realm管理脚本，测试使用，仅供参考
+#   Description: Realm管理脚本，仅供参考
 #   From: https://github.com/terminodev
 #=================================================
 
@@ -25,7 +25,7 @@ OK="${Green}[OK]${Font}"
 ERROR="${Red}[ERROR]${Font}"
 
 # 变量
-shell_version="1.0.1"
+shell_version="1.0.2"
 shelldir=$(pwd)
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[信息]${Font_color_suffix}"
@@ -217,7 +217,7 @@ echo '
       "1.1.1.1:53",
       "223.5.5.5:53"
     ],
-    "min_ttl": 0,
+    "min_ttl": 60,
     "max_ttl": 3600,
     "cache_size": 256
   },
@@ -479,13 +479,14 @@ Disable_Realm(){
 
 #添加设置
 Set_Config(){
+[ -e /opt/realm/rawconf ] || touch /opt/realm/rawconf
 echo -e " 请输入本地监听端口[1-65535] (支持端口段如10000-10002,数量要和目标端口一致)"
-read -e -p " 留空则随机分配[30000-40000]之间一个端口:" listening_ports
+read -e -p " 留空则随机分配[10000-16383]之间一个端口:" listening_ports
 if [[ -z "${listening_ports}" ]]; then
     listening_port_temp1=0
     listening_ports=0
     while [ $listening_ports == 0 ]; do
-       listening_port_temp1=`shuf -i 30000-40000 -n1`
+       listening_port_temp1=`shuf -i 10000-16383 -n1`
        if [ "$(cat /opt/realm/rawconf |cut -d# -f1 |grep "${listening_port_temp1}" |wc -l)" == 0 ] ; then
               listening_ports=$listening_port_temp1
        fi
@@ -500,10 +501,9 @@ if [[ "${listening_ports_count}" -eq 1 ]]; then
     echo -e "${Red}您输入的端口已存在，请换一个端口${Font}"
     before_show_menu
 fi
-read -e -p " 请输入转发的目标地址/IP :" remote_addresses
+read -e -p " 请输入转发的目标地址/IP（默认：127.0.0.1） :" remote_addresses
 if [[ -z "${remote_addresses}" ]]; then
-    echo -e "${Yellow}已取消${Font}"
-    before_show_menu
+    remote_addresses=127.0.0.1
 fi
 if [[ $remote_addresses =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]];then
     c=`echo $remote_addresses |cut -d. -f1`
@@ -526,7 +526,7 @@ if [[ ! "${remote_ports}" =~ ^[0-9]+$ ]]; then
     before_show_menu
 fi
 tunnel_type=n
-confirm "是否使用隧道转发？" "n"
+confirm "是否使用隧道转发？[y/n]" "n"
 if [[ $? == 0 ]]; then
     read -e -p " 请输入隧道类型（默认：s，客户端填 c，服务端填 s ）:" tunnel_type
     if [[ -z "${tunnel_type}" ]]; then
@@ -547,7 +547,7 @@ if [[ $? == 0 ]]; then
         fi
     fi
     if [[ "${tunnel_mode}" == tls || "${tunnel_mode}" == wss ]]; then
-        read -e -p " 请输入伪装path（客户端和服务器必须保持一致，默认：apps.bdimg.com）:" tunnel_sni
+        read -e -p " 请输入伪装sni（客户端和服务器必须保持一致，默认：apps.bdimg.com）:" tunnel_sni
         if [[ -z "${tunnel_sni}" ]]; then
             tunnel_sni=apps.bdimg.com
         fi
@@ -603,31 +603,33 @@ fi
             temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
             echo $temp >$realm_conf_path
         elif [[ "${tunnel_mode}" == tls ]]; then
-            JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;sni=domain.com;servername=domain.com"}'
+            if [[ "${tunnel_type}" == c ]]; then
+                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;sni=snidomain.com;insecure"}'
+                JSON=${JSON/tunnel_type/remote_transport}
+            else
+                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;servername=snidomain.com"}'
+                JSON=${JSON/tunnel_type/listen_transport}
+            fi
             JSON=${JSON/listening_ports/$listening_ports}
             JSON=${JSON/remote_addresses/$remote_addresses}
             JSON=${JSON/remote_ports/$remote_ports}
-            if [[ "${tunnel_type}" == c ]]; then
-                JSON=${JSON/tunnel_type/remote_transport}
-            else
-                JSON=${JSON/tunnel_type/listen_transport}
-            fi
-            JSON=${JSON/domain.com/$tunnel_sni}
+            JSON=${JSON/snidomain.com/$tunnel_sni}
             temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
             echo $temp >$realm_conf_path
         elif [[ "${tunnel_mode}" == wss ]]; then
-            JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;sni=domain.com;servername=domain.com"}'
+            if [[ "${tunnel_type}" == c ]]; then
+                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;sni=snidomain.com;insecure"}'
+                JSON=${JSON/tunnel_type/remote_transport}
+            else
+                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;servername=snidomain.com"}'
+                JSON=${JSON/tunnel_type/listen_transport}
+            fi
             JSON=${JSON/listening_ports/$listening_ports}
             JSON=${JSON/remote_addresses/$remote_addresses}
             JSON=${JSON/remote_ports/$remote_ports}
-            if [[ "${tunnel_type}" == c ]]; then
-                JSON=${JSON/tunnel_type/remote_transport}
-            else
-                JSON=${JSON/tunnel_type/listen_transport}
-            fi
             JSON=${JSON/example.com/$tunnel_host}
             JSON=${JSON/\/chat/$tunnel_path}
-            JSON=${JSON/domain.com/$tunnel_sni}
+            JSON=${JSON/snidomain.com/$tunnel_sni}
             temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
             echo $temp >$realm_conf_path
         fi
@@ -898,31 +900,33 @@ Reload_Realm(){
                 temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
                 echo $temp >$realm_conf_path
             elif [[ "${tunnel_mode}" == tls ]]; then
-                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;sni=domain.com;servername=domain.com"}'
+                if [[ "${tunnel_type}" == c ]]; then
+                    JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;sni=snidomain.com;insecure"}'
+                    JSON=${JSON/tunnel_type/remote_transport}
+                else
+                    JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"tls;servername=snidomain.com"}'
+                    JSON=${JSON/tunnel_type/listen_transport}
+                fi
                 JSON=${JSON/listening_ports/$listening_ports}
                 JSON=${JSON/remote_addresses/$remote_addresses}
                 JSON=${JSON/remote_ports/$remote_ports}
-                if [[ "${tunnel_type}" == c ]]; then
-                    JSON=${JSON/tunnel_type/remote_transport}
-                else
-                    JSON=${JSON/tunnel_type/listen_transport}
-                fi
-                JSON=${JSON/domain.com/$tunnel_sni}
+                JSON=${JSON/snidomain.com/$tunnel_sni}
                 temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
                 echo $temp >$realm_conf_path
             elif [[ "${tunnel_mode}" == wss ]]; then
-                JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;sni=domain.com;servername=domain.com"}'
+                if [[ "${tunnel_type}" == c ]]; then
+                    JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;sni=snidomain.com;insecure"}'
+                    JSON=${JSON/tunnel_type/remote_transport}
+                else
+                    JSON='{"listen":"[::]:listening_ports","remote":"remote_addresses:remote_ports","tunnel_type":"ws;host=example.com;path=/chat;tls;servername=snidomain.com"}'
+                    JSON=${JSON/tunnel_type/listen_transport}
+                fi
                 JSON=${JSON/listening_ports/$listening_ports}
                 JSON=${JSON/remote_addresses/$remote_addresses}
                 JSON=${JSON/remote_ports/$remote_ports}
-                if [[ "${tunnel_type}" == c ]]; then
-                    JSON=${JSON/tunnel_type/remote_transport}
-                else
-                    JSON=${JSON/tunnel_type/listen_transport}
-                fi
                 JSON=${JSON/example.com/$tunnel_host}
                 JSON=${JSON/\/chat/$tunnel_path}
-                JSON=${JSON/domain.com/$tunnel_sni}
+                JSON=${JSON/snidomain.com/$tunnel_sni}
                 temp=$(jq --argjson data $JSON '.endpoints += [$data]' $realm_conf_path)
                 echo $temp >$realm_conf_path
             fi
@@ -1079,12 +1083,12 @@ ${Green_font_prefix}21.${Font_color_suffix} 添加一条 Realm 规则
 ${Green_font_prefix}22.${Font_color_suffix} 删除一条 Realm 规则
 ${Green_font_prefix}23.${Font_color_suffix} 修改一条 Realm 规则
 ${Green_font_prefix}24.${Font_color_suffix} 查看所有 Realm 规则
-${Green_font_prefix}25.${Font_color_suffix} 重新加载 Realm 规则(加载/opt/realm/rawconf文件，可手动修改)
-${Green_font_prefix}26.${Font_color_suffix} 初始化   Realm 规则(清空现有规则)
+${Green_font_prefix}25.${Font_color_suffix} 重新加载 Realm 规则文件(/opt/realm/rawconf)
+${Green_font_prefix}26.${Font_color_suffix} 初始化   Realm 规则
 —————————————— 其他选项 ——————————————
-${Green_font_prefix}31.${Font_color_suffix} 备份/恢复配置
-${Green_font_prefix}32.${Font_color_suffix} 添加定时重启任务
-${Green_font_prefix}33.${Font_color_suffix} 添加自动更新Realm
+${Green_font_prefix}31.${Font_color_suffix} 备份/恢复配置文件
+${Green_font_prefix}32.${Font_color_suffix} 设置定时重启任务
+${Green_font_prefix}33.${Font_color_suffix} 设置自动更新Realm
 ${Green_font_prefix}40.${Font_color_suffix} 退出脚本
 "
  show_status
