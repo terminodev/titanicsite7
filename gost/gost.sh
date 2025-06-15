@@ -69,14 +69,15 @@ else
 fi
 chmod +x /opt/gost/gost
 tmpdomain=`echo $RANDOM | md5sum | cut -c1-8`
-openssl req -newkey rsa:4096 \
+openssl req -newkey rsa:2048 \
             -x509 \
             -sha256 \
             -days 3650 \
             -nodes \
             -out /opt/gost/cert.pem \
             -keyout /opt/gost/key.pem \
-            -subj "/C=US/ST=Alabama/L=Montgomery/O=Super Shops/OU=Marketing/CN=www.${tmpdomain}.com"
+            -subj "/C=US/ST=Alabama/L=Montgomery/O=Super Shops/OU=Marketing/CN=*.${tmpdomain}.com" \
+            -addext "subjectAltName=DNS:*.${tmpdomain}.com,DNS:${tmpdomain}.com"
 
 cat <<EOF > /etc/systemd/system/gost.service
 [Unit]
