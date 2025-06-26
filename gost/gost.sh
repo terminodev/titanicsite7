@@ -77,7 +77,29 @@ openssl req -newkey rsa:2048 \
             -out /opt/gost/cert.pem \
             -keyout /opt/gost/key.pem \
             -subj "/C=US/ST=Alabama/L=Montgomery/O=Super Shops/OU=Marketing/CN=*.${tmpdomain}.com" \
-            -addext "subjectAltName=DNS:*.${tmpdomain}.com,DNS:${tmpdomain}.com"
+            -addext "subjectAltName=DNS:*.${tmpdomain}.com,DNS:${tmpdomain}.com"; ret=$?
+if [[ ! $ret == 0 ]]; then
+    cat > "/tmp/openssl_tmp.cnf" << EOF
+[ req ]
+distinguished_name = req_distinguished_name
+attributes         = req_attributes
+
+[ req_distinguished_name ]
+
+[ req_attributes ]
+EOF
+    openssl req -newkey rsa:2048 \
+                -x509 \
+                -sha256 \
+                -days 730 \
+                -nodes \
+                -out /opt/gost/cert.pem \
+                -keyout /opt/gost/key.pem \
+                -subj "/C=CA/ST=British Columbia/L=Vancouver/O=Elite Retail/OU=Sales/CN=*.${tmpdomain}" \
+                -extensions SAN \
+                -config <(cat /tmp/openssl_tmp.cnf <(printf "\n[SAN]\nsubjectAltName=DNS:*.${tmpdomain},DNS:${tmpdomain}"))
+    rm -f /tmp/openssl_tmp.cnf
+fi
 
 cat <<EOF > /etc/systemd/system/gost.service
 [Unit]
