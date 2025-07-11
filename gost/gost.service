@@ -1,0 +1,21 @@
+[Unit]
+Description=Gost server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+LimitCORE=infinity
+LimitNOFILE=512000
+LimitNPROC=512000
+Type=simple
+DynamicUser=yes
+StandardOutput=null
+#StandardError=journal
+WorkingDirectory=/opt/gost
+ExecStart=/opt/gost/gost -C /opt/gost/config.json
+User=root
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
