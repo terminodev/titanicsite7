@@ -99,11 +99,15 @@ install(){
         elif [[ x"${release}" == x"ubuntu" ]]; then
             apt update -y
             echo "iperf3 iperf3/start_daemon boolean false" | debconf-set-selections
+            echo "libc6 glibc/restart-services string ssh exim4 cron" | debconf-set-selections
+            echo "*	libraries/restart-without-asking	boolean	true" | debconf-set-selections
             apt install -y vim wget curl lrzsz tar lsof dnsutils nload iperf3 screen cron openssl libsodium-dev libgnutls30 ca-certificates systemd python3-dev python3-pip locales-all
             update-ca-certificates
         elif [[ x"${release}" == x"debian" ]]; then
             apt update -y
             echo "iperf3 iperf3/start_daemon boolean false" | debconf-set-selections
+            echo "libc6 glibc/restart-services string ssh exim4 cron" | debconf-set-selections
+            echo "*	libraries/restart-without-asking	boolean	true" | debconf-set-selections
             apt install -y vim wget curl lrzsz tar lsof dnsutils nload iperf3 screen cron openssl libsodium-dev libgnutls30 ca-certificates systemd python3-dev python3-pip locales-all
             update-ca-certificates
         fi
