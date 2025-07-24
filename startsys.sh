@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 ###
- # @Description: 适用于Centos Debian Ubuntu的新系统初始优化，脚本仅内部测试使用
+ # @Description: 适用于Centos Debian Ubuntu的新系统初始优化脚本,内部测试使用,仅供参考
  # @From: https://github.com/terminodev
 ###
 
@@ -98,10 +98,12 @@ install(){
             fi
         elif [[ x"${release}" == x"ubuntu" ]]; then
             apt update -y
+            echo "iperf3 iperf3/start_daemon boolean false" | debconf-set-selections
             apt install -y vim wget curl lrzsz tar lsof dnsutils nload iperf3 screen cron openssl libsodium-dev libgnutls30 ca-certificates systemd python3-dev python3-pip locales-all
             update-ca-certificates
         elif [[ x"${release}" == x"debian" ]]; then
             apt update -y
+            echo "iperf3 iperf3/start_daemon boolean false" | debconf-set-selections
             apt install -y vim wget curl lrzsz tar lsof dnsutils nload iperf3 screen cron openssl libsodium-dev libgnutls30 ca-certificates systemd python3-dev python3-pip locales-all
             update-ca-certificates
         fi
