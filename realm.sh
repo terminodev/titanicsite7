@@ -227,6 +227,8 @@ echo '
     "ipv6_only": false,
     "tcp_timeout": 5,
     "udp_timeout": 30,
+    "send_mptcp": false,
+    "accept_mptcp": false,
     "send_proxy": false,
     "send_proxy_version": 2,
     "accept_proxy": false,
