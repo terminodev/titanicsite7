@@ -99,7 +99,7 @@ TimeoutStopSec=5s
 LimitNOFILE=1048576
 LimitNPROC=512
 PrivateTmp=true
-ProtectSystem=full
+ProtectSystem=strict
 ReadWritePaths=/etc/caddy
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 # Automatically restart caddy if it crashes except if the exit code was 1
