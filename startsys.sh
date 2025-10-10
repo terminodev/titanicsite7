@@ -139,7 +139,7 @@ set_securite(){
            sed -i '$a PermitEmptyPasswords no' /etc/ssh/sshd_config
         fi
         if grep -q "^IgnoreRhosts" /etc/ssh/sshd_config; then
-            sed -i '/^IgnoreRhosts/s/no/yes/' /etc/ssh/sshd_config
+            sed -i 's/^IgnoreRhosts.*/IgnoreRhosts yes/' /etc/ssh/sshd_config
         else
            sed -i '$a IgnoreRhosts yes' /etc/ssh/sshd_config
         fi
