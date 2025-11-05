@@ -303,7 +303,6 @@ ReadWritePaths=/opt/realm
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=realm
-LogsDirectory=realm
 
 [Install]
 WantedBy=multi-user.target' > /etc/systemd/system/realm.service
