@@ -365,45 +365,47 @@ if [ "${uninstall}" = "1" ]; then
     exit 0
 fi
 
-if [ "$ipv6" = "1" ]; then
-    static_IPv6_mode="false"
-    last_notable_hexes="ffff:ffff"
-    ipv6_regex="(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"
-
-    if $static_IPv6_mode; then
-        if { command -v "ip" &>/dev/null; }; then
-            address_ip=$(ip -6 -o addr show scope global primary -deprecated | grep -oE "$ipv6_regex" | grep -oE ".*($last_notable_hexes)$")
-        else
-            address_ip=$(ifconfig | grep -oE "$ipv6_regex" | grep -oE ".*($last_notable_hexes)$")
-        fi
-    else
-        address_ip=$(curl -s -6 https://cloudflare.com/cdn-cgi/trace | grep -E '^ip'); ret=$?
-        if [[ ! $ret == 0 ]]; then
-            address_ip=$(curl -s -6 https://api64.ipify.org || curl -s -6 https://ipv6.icanhazip.com)
-        else
-            address_ip=$(echo $ip | sed -E "s/^ip=($ipv6_regex)$/\1/")
-        fi
-    fi
-
-    if [[ ! $address_ip =~ ^$ipv6_regex$ ]]; then
-        echo -e "${red}Failed to find a valid IPv6 address.${plain}"
-        exit 1
-    fi
-    domain_resolve=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=${domain}&type=AAAA" | jq -r '.Answer[0].data')
-else
-    ipv4_regex='([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])'
-    address_ip=$(curl -s -4 https://cloudflare.com/cdn-cgi/trace | grep -E '^ip'); ret=$?
-    if [[ ! $ret == 0 ]]; then
-        address_ip=$(curl -s https://api.ipify.org || curl -s https://ipv4.icanhazip.com)
-    else
-        address_ip=$(echo $address_ip | sed -E "s/^ip=($ipv4_regex)$/\1/")
-    fi
-
-    if [[ ! $address_ip =~ ^$ipv4_regex$ ]]; then
-        echo -e "${red}Failed to find a valid IP.${plain}"
-        exit 2
-    fi
-    domain_resolve=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=${domain}&type=A" | jq -r '.Answer[0].data')
+if [ -n "$domain" ]; then
+	if [ "$ipv6" = "1" ]; then
+	    static_IPv6_mode="false"
+	    last_notable_hexes="ffff:ffff"
+	    ipv6_regex="(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))"
+	
+	    if $static_IPv6_mode; then
+	        if { command -v "ip" &>/dev/null; }; then
+	            address_ip=$(ip -6 -o addr show scope global primary -deprecated | grep -oE "$ipv6_regex" | grep -oE ".*($last_notable_hexes)$")
+	        else
+	            address_ip=$(ifconfig | grep -oE "$ipv6_regex" | grep -oE ".*($last_notable_hexes)$")
+	        fi
+	    else
+	        address_ip=$(curl -s -6 https://cloudflare.com/cdn-cgi/trace | grep -E '^ip'); ret=$?
+	        if [[ ! $ret == 0 ]]; then
+	            address_ip=$(curl -s -6 https://api64.ipify.org || curl -s -6 https://ipv6.icanhazip.com)
+	        else
+	            address_ip=$(echo $ip | sed -E "s/^ip=($ipv6_regex)$/\1/")
+	        fi
+	    fi
+	
+	    if [[ ! $address_ip =~ ^$ipv6_regex$ ]]; then
+	        echo -e "${red}Failed to find a valid IPv6 address.${plain}"
+	        exit 1
+	    fi
+	    domain_resolve=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=${domain}&type=AAAA" | grep -o '"data":"[^"]*' | head -n1 | cut -d'"' -f4)
+	else
+	    ipv4_regex='([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])'
+	    address_ip=$(curl -s -4 https://cloudflare.com/cdn-cgi/trace | grep -E '^ip'); ret=$?
+	    if [[ ! $ret == 0 ]]; then
+	        address_ip=$(curl -s https://api.ipify.org || curl -s https://ipv4.icanhazip.com)
+	    else
+	        address_ip=$(echo $address_ip | sed -E "s/^ip=($ipv4_regex)$/\1/")
+	    fi
+	
+	    if [[ ! $address_ip =~ ^$ipv4_regex$ ]]; then
+	        echo -e "${red}Failed to find a valid IP.${plain}"
+	        exit 2
+	    fi
+	    domain_resolve=$(curl -sH 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=${domain}&type=A" | grep -o '"data":"[^"]*' | head -n1 | cut -d'"' -f4)
+	fi
 fi
 nip_domain=${address_ip}.sslip.io
 
