@@ -420,16 +420,25 @@ install_caddy
 if [ "$type" = "trojan" ]; then
     config_trojan
     clear
-    echo -e "${green}You have successfully installed Trojan./您已成功安装 Trojan。${plain}"
+    echo -e "${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${plain}"
+    echo -e "${green}✓ 安装成功 / Installation Successful${plain}"
+    echo -e "${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${plain}"
     if [ "$ssl" = "0" ]; then
-        echo -e "${green}Address(地址): ${address_ip} | Port(端口): ${port}${plain}"
-        echo -e "${green}Password(密码): ${password} | Alpn: h2,http/1.1${plain}"
-        echo -e "${green}Sni: ${domain}${plain}"
-        echo -e "${yellow}Turn on Skip Certificate Validation./请开启跳过证书验证。${plain}"
+        echo -e "地址 (Address)   : ${yellow}${address_ip}${plain}"
+        echo -e "端口 (Port)      : ${yellow}${port}${plain}"
+        echo -e "密码 (Password)  : ${yellow}${password}${plain}"
+        echo -e "Alpn             : ${yellow}h2,http/1.1${plain}"
+        echo -e "Sni              : ${yellow}${domain}${plain}"
+        echo -e "${yellow}───────────────────────────────────────────${plain}"
+        echo -e "${yellow}⚠  提示 (Tip)    : 请开启跳过证书验证${plain}"
+        echo -e "${yellow}                  (Enable Skip Cert Verify)${plain}"
     elif [ "$ssl" = "1" ]; then
-        echo -e "${green}Address(地址): ${domain} | Port(端口): ${port}${plain}"
-        echo -e "${green}Password(密码): ${password} | Alpn: h2,http/1.1${plain}"
+        echo -e "地址 (Address)   : ${yellow}${domain}${plain}"
+        echo -e "端口 (Port)      : ${yellow}${port}${plain}"
+        echo -e "密码 (Password)  : ${yellow}${password}${plain}"
+        echo -e "Alpn             : ${yellow}h2,http/1.1${plain}"
     fi
+	echo -e "${green}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${plain}"
 elif [ "$type" = "naiveproxy" ]; then
     [ -z "$username" ] && username=$(echo $RANDOM | md5sum | cut -c1-8)
     config_naiveproxy
