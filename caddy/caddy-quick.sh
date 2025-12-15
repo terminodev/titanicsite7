@@ -420,21 +420,21 @@ install_caddy
 if [ "$type" = "trojan" ]; then
     config_trojan
     clear
-    echo -e "${green}You have successfully installed Trojan.${plain}"
+    echo -e "${green}You have successfully installed Trojan./您已成功安装 Trojan。${plain}"
     if [ "$ssl" = "0" ]; then
-        echo -e "${green}Address: ${address_ip} | Port: ${port}${plain}"
-        echo -e "${green}Password: ${password} | Alpn: h2,http/1.1${plain}"
+        echo -e "${green}Address(地址): ${address_ip} | Port(端口): ${port}${plain}"
+        echo -e "${green}Password(密码): ${password} | Alpn: h2,http/1.1${plain}"
         echo -e "${green}Sni: ${domain}${plain}"
-        echo -e "${yellow}Turn on Skip Certificate Validation${plain}"
+        echo -e "${yellow}Turn on Skip Certificate Validation./请开启跳过证书验证。${plain}"
     elif [ "$ssl" = "1" ]; then
-        echo -e "${green}Address: ${domain} | Port: ${port}${plain}"
-        echo -e "${green}Password: ${password} | Alpn: h2,http/1.1${plain}"
+        echo -e "${green}Address(地址): ${domain} | Port(端口): ${port}${plain}"
+        echo -e "${green}Password(密码): ${password} | Alpn: h2,http/1.1${plain}"
     fi
 elif [ "$type" = "naiveproxy" ]; then
     [ -z "$username" ] && username=$(echo $RANDOM | md5sum | cut -c1-8)
     config_naiveproxy
     clear
-    echo -e "${green}You have successfully installed Naiveproxy.${plain}"
+    echo -e "${green}You have successfully installed Naiveproxy./您已成功安装Naiveproxy。${plain}"
     echo "{"
     echo "    \"listen\": \"socks://127.0.0.1:1080\","
     echo "    \"proxy\": \"https://${username}:${password}@${domain}:${port}\""
