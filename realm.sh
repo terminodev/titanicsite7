@@ -977,22 +977,26 @@ Time_Task(){
           sed -i "/systemctl restart realm/d" /tmp/cronconf
       fi
       echo -e "请选择定时重启任务类型:"
-      echo -e "1.分钟 2.小时 3.天" 
+      echo -e "1.分钟 2.小时 3.天(默认)" 
       read -p "请输入类型: " type_num
+      [[ -z ${type_num} ]] && type_num="3"
       case "$type_num" in
         1)
       echo -e "请设置每多少分钟重启Realm任务"   
-      read -p "请设置分钟数: " type_m
+      read -p "请设置分钟数(默认30分钟): " type_m
+      [[ -z ${type_m} ]] && type_m="30"
       echo "*/$type_m * * * *  systemctl restart realm" >> /tmp/cronconf
         ;;
         2)
       echo -e "请设置每多少小时重启Realm任务"   
-      read -p "请设置小时数: " type_h
+      read -p "请设置小时数(默认6小时): " type_h
+      [[ -z ${type_h} ]] && type_h="6"
       echo "0 */$type_h * * *  systemctl restart realm" >> /tmp/cronconf
         ;;
         3)
       echo -e "请设置每多少天重启Realm任务"    
-      read -p "请设置天数: " type_d
+      read -p "请设置天数(默认1天): " type_d
+      [[ -z ${type_d} ]] && type_d="1"
       echo "0 6 */$type_d * *  systemctl restart realm" >> /tmp/cronconf
         ;;
         *)
