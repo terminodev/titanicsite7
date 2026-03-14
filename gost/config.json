@@ -1,0 +1,53 @@
+{
+    "Debug": false,
+    "Retries": 3,
+    "ServeNodes": [
+        "relay+ws://:20000/127.0.0.1:6666"
+    ],
+    "ChainNodes": [
+    ],
+    "Routes": [
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        },
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        },
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        },
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        },
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        },
+        {
+            "Retries": 3,
+            "ServeNodes": [
+            ],
+            "ChainNodes": [
+            ]
+        }
+    ]
+}
