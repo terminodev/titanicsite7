@@ -72,23 +72,23 @@ install_csm(){
 
 hello(){
     echo ""
-    echo -e "${yellow}流媒体解锁测试后端一键安装脚本${plain}"
-    echo -e "${yellow}支持系统:  CentOS 7+, Debian8+, Ubuntu16+${plain}"
+    echo -e "${yellow}流媒体解锁检查后端一键安装脚本${plain}"
+    echo -e "${yellow}支持系统:  CentOS7+, Debian9+, Ubuntu16+${plain}"
     echo ""
 }
 
 help(){
     hello
-    echo "使用示例：bash $0 -p SSpanel -w http://www.domain.com:80 -k apikey -i 10"
+    echo "使用示例：bash $0 -w http://www.domain.com:80 -k apikey -i 10"
     echo ""
     echo "  -h     显示帮助信息"
-    echo "  -p     【必填】指定前端面板类型，默认为SSpanel，可选：SSPanel,V2board,PMpanel,Proxypanel"
     echo "  -w     【必填】指定WebApi地址，例：http://www.domain.com:80"
     echo "  -k     【必填】指定WebApikey"
     echo "  -i     【必填】指定节点ID"
     echo ""
 }
 
+paneltype=SSpanel
 apihost=www.domain.com
 apikey=demokey
 nodeid=demoid
