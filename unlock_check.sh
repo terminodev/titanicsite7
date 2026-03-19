@@ -485,18 +485,18 @@ WebTest_Claude() {
     local response=$(curl ${CURL_OPTS} -${1} -s -L -A "${UA_BROWSER}" -o /dev/null -w '%{url_effective}' "https://claude.ai/")
     if [ -z "$response" ]; then
         modifyJsonTemplate 'Claude_result' 'Unknown'
-        echo -e "\r Claude:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
+        echo -n -e "\r Claude:\t\t\t\t${Font_Red}Failed (Network Connection)${Font_Suffix}\n"
         return
     fi
     if [[ "$response" == "https://claude.ai/" ]]; then
         modifyJsonTemplate 'Claude_result' 'Yes'
-        echo -e "\r Claude:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
+        echo -n -e "\r Claude:\t\t\t\t${Font_Green}Yes${Font_Suffix}\n"
     elif [[ "$response" == "https://www.anthropic.com/app-unavailable-in-region" ]]; then
         modifyJsonTemplate 'Claude_result' 'No'
-        echo -e "\r Claude:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
+        echo -n -e "\r Claude:\t\t\t\t${Font_Red}No${Font_Suffix}\n"
     else
         modifyJsonTemplate 'Claude_result' 'Unknown'
-        echo -e "\r Claude:\t\t\t\t${Font_Yellow}Unknown (${response})${Font_Suffix}\n"
+        echo -n -e "\r Claude:\t\t\t\t${Font_Yellow}Unknown (${response})${Font_Suffix}\n"
     fi
 }
 
@@ -620,11 +620,9 @@ postData() {
 
     RESPONSE_TMP=$(mktemp)
     content=$(base64 "$JSON_TMP" | tr -d '\n\r ')
-    
     curl -s -X POST -d "content=$content" \
         "${panel_address}/mod_mu/media/save_report?key=${mu_key}&node_id=${node_id}" \
         > "$RESPONSE_TMP"
-        
     if [[ "$(cat "$RESPONSE_TMP")" != "ok" ]]; then
         curl -s -X POST -d "content=$content" \
             "${panel_address}/mod_mu/media/saveReport?key=${mu_key}&node_id=${node_id}" \
@@ -704,9 +702,7 @@ checkConfig() {
 }
 
 printInfo() {
-    echo
     echo -e "${Font_Green}[Stream Platform & AI Platform Restriction Test]${Font_Suffix}"
-    echo
     echo -e "${Font_Green}Test Starts At: $(date)${Font_Suffix}"
     echo -e "${Font_Green}Version: 2026-03-18${Font_Suffix}"
 }
@@ -743,4 +739,4 @@ main() {
 
 trap cleanup EXIT
 
-main
+main "$@"
