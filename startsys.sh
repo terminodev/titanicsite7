@@ -512,18 +512,14 @@ set_locale() {
             grep -q '^zh_CN.UTF-8[[:space:]]\+UTF-8' /etc/locale.gen || echo "zh_CN.UTF-8 UTF-8" >> /etc/locale.gen
         fi
         command -v locale-gen >/dev/null 2>&1 && locale-gen zh_CN.UTF-8 >/dev/null 2>&1 || true
-        command -v update-locale >/dev/null 2>&1 && update-locale LANG=zh_CN.UTF-8 LC_ALL=zh_CN.UTF-8 >/dev/null 2>&1 || true
+        command -v update-locale >/dev/null 2>&1 && update-locale LANG=zh_CN.UTF-8 >/dev/null 2>&1 || true
         if [[ -f /etc/default/locale ]]; then
             grep -q '^LANG=' /etc/default/locale 2>/dev/null && \
                 sed -i 's/^LANG=.*/LANG=zh_CN.UTF-8/' /etc/default/locale || \
                 echo 'LANG=zh_CN.UTF-8' >> /etc/default/locale
-            grep -q '^LC_ALL=' /etc/default/locale 2>/dev/null && \
-                sed -i 's/^LC_ALL=.*/LC_ALL=zh_CN.UTF-8/' /etc/default/locale || \
-                echo 'LC_ALL=zh_CN.UTF-8' >> /etc/default/locale
         fi
     fi
     export LANG=zh_CN.UTF-8
-    export LC_ALL=zh_CN.UTF-8
     msg_ok "系统字符集配置完成"
 }
 
