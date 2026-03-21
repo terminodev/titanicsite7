@@ -71,7 +71,7 @@ install_caddy() {
         build_caddy
     else
         if [ "${SYSTEM_ARCH}" = "amd64" ] || [ "${SYSTEM_ARCH}" = "arm64" ]; then
-            caddy_url=https://raw.githubusercontent.com/terminodev/titanicsite7/main/caddy/caddy2.10.2_with_t_n_linux_${SYSTEM_ARCH}.tgz
+            caddy_url=https://raw.githubusercontent.com/terminodev/titanicsite7/main/caddy/caddy2.11.2_with_t_n_linux_${SYSTEM_ARCH}.tgz
         else
             echo -e "${red}Error: There is no package for your operating system, please use the [-b] option to compile the installation${plain}" ; exit 1
         fi
