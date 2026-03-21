@@ -6,7 +6,7 @@
 
 - 系统支持RHEL 7+ (CentOS、RedHat、AlmaLinux、RockyLinux)、Debian 9+、Ubuntu 16+
 
-- 提供caddy`v2.10.2`的预编译二进制包，并附带编译安装方式，不写入系统环境变量，确保系统干净如初。
+- 提供caddy`v2.11.2`的预编译二进制包，并附带编译安装方式，不写入系统环境变量，确保系统干净如初。
 
 - Caddy包含插件：[caddy-trojan](https://github.com/imgk/caddy-trojan) | [forwardproxy-naive](https://github.com/klzgrad/forwardproxy) 
 
@@ -130,17 +130,36 @@ SNI: example.com       #域名
 
 - 配置Go环境
 ```
-curl -L https://go.dev/dl/go1.25.1.linux-amd64.tar.gz | tar -zx -C /usr/local
-echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/golang.sh
-source /etc/profile.d/golang.sh
+curl -L https://go.dev/dl/go1.26.1.linux-amd64.tar.gz | tar -zx -C /usr/local
+#仅当前会话生效
+export PATH=$PATH:/usr/local/go/bin
+#【可选】会话重新登录长期生效
+echo 'export PATH=$PATH:/usr/local/go/bin' >> $HOME/.profile
+source $HOME/.profile
+#打印Go版本，验证是否安装成功
 go version
 ```
 
-- 安装xcaddy并编译amd64架构安装包
+- 安装xcaddy并编译amd64/arm64架构安装包
 ```
 go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
 # amd64架构
 CADDY_VERSION=latest CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ~/go/bin/xcaddy build --with github.com/imgk/caddy-trojan --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
 # arm64架构
 CADDY_VERSION=latest CGO_ENABLED=0 GOOS=linux GOARCH=arm64 ~/go/bin/xcaddy build --with github.com/imgk/caddy-trojan --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive
+```
+
+- 编译并附加更多常用插件
+```
+# amd64架构
+CADDY_VERSION=latest CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ~/go/bin/xcaddy build \
+    --with github.com/imgk/caddy-trojan \
+    --with github.com/caddyserver/forwardproxy=github.com/klzgrad/forwardproxy@naive \
+    --with github.com/mholt/caddy-webdav \
+    --with github.com/WeidiDeng/caddy-cloudflare-ip \
+    --with github.com/xcaddyplugins/caddy-trusted-cloudfront \
+    --with github.com/caddy-dns/cloudflare \
+    --with github.com/mholt/caddy-events-exec \
+    --with github.com/mholt/caddy-l4/layer4 \
+    --with github.com/caddyserver/jsonc-adapter
 ```
