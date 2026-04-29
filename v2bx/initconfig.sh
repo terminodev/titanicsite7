@@ -258,6 +258,7 @@ generate_config_file() {
             \"Level\": \"error\",
             \"ErrorPath\": \"/opt/V2bX/config/error.log\"
         },
+        \"AssetPath\": \"/opt/V2bX/config/\",
         \"OutboundConfigPath\": \"/opt/V2bX/config/custom_outbound.json\",
         \"RouteConfigPath\": \"/opt/V2bX/config/route.json\"
     },"
