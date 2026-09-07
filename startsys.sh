@@ -280,6 +280,18 @@ install_pkg() {
         update-ca-certificates; check_command "更新 CA 证书"
     elif [[ "${release}" == "debian" ]]; then
         export DEBIAN_FRONTEND=noninteractive
+        if [[ "${os_version}" -eq 11 ]]; then
+            cat > /etc/apt/sources.list << 'EOF'
+deb [check-valid-until=no] http://archive.debian.org/debian bullseye main
+deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye main
+deb http://deb.debian.org/debian-security bullseye-security main
+deb-src http://deb.debian.org/debian-security bullseye-security main
+deb [check-valid-until=no] http://archive.debian.org/debian bullseye-updates main
+deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye-updates main
+deb [check-valid-until=no] http://archive.debian.org/debian bullseye-backports main
+deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye-backports main
+EOF
+        fi
         apt-get update -y; check_command "apt-get update"
         echo "iperf3 iperf3/start_daemon boolean false" | debconf-set-selections
         echo "libc6 glibc/restart-services string ssh exim4 cron" | debconf-set-selections
