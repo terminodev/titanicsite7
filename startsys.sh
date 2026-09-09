@@ -220,6 +220,39 @@ check_version() {
     esac
 }
 
+# 提醒已停止维护或近期停止维护的系统版本
+warn_eol_versions() {
+    local warning_title=""
+    local warning_message=""
+    case "${release}:${os_version}" in
+        debian:9)
+            warning_title="当前系统为 Debian 9"
+            warning_message="Debian 9 已停止维护，当前系统仅建议作为临时过渡环境使用。"
+            ;;
+        debian:10)
+            warning_title="当前系统为 Debian 10"
+            warning_message="Debian 10 已停止维护，当前系统仅建议作为临时过渡环境使用。"
+            ;;
+        debian:11)
+            warning_title="当前系统为 Debian 11"
+            warning_message="Debian 11 已停止维护，请尽快升级到受支持的系统版本。"
+            ;;
+        ubuntu:16)
+            warning_title="当前系统为 Ubuntu 16"
+            warning_message="Ubuntu 16 已停止维护，当前系统仅建议作为临时过渡环境使用。"
+            ;;
+        centos:7)
+            warning_title="当前系统为 CentOS 7"
+            warning_message="CentOS 7 已停止维护，请尽快升级到受支持的系统版本。"
+            ;;
+        *)
+            return 0
+            ;;
+    esac
+    echo -e "\n${YELLOWFLASH}${WARN} 严重提醒：${warning_title}${PLAIN}"
+    echo -e "${YELLOWFLASH}${WARN} ${warning_message}${PLAIN}\n"
+}
+
 # 解析命令行参数
 parse_args() {
     while [[ $# -gt 0 ]]; do
@@ -284,12 +317,8 @@ install_pkg() {
             cat > /etc/apt/sources.list << 'EOF'
 deb [check-valid-until=no] http://archive.debian.org/debian bullseye main
 deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye main
-deb http://deb.debian.org/debian-security bullseye-security main
-deb-src http://deb.debian.org/debian-security bullseye-security main
 deb [check-valid-until=no] http://archive.debian.org/debian bullseye-updates main
 deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye-updates main
-deb [check-valid-until=no] http://archive.debian.org/debian bullseye-backports main
-deb-src [check-valid-until=no] http://archive.debian.org/debian bullseye-backports main
 EOF
         fi
         apt-get update -y; check_command "apt-get update"
@@ -942,6 +971,7 @@ main() {
     parse_args "$@"
     detect_os
     check_version
+    warn_eol_versions
 
     # 开始边框
     echo -e "\n${GREEN}╔════════════════════════════════════════════════╗${PLAIN}"
@@ -972,6 +1002,7 @@ main() {
     echo -e "${GREEN}╚════════════════════════════════════════════════╝${PLAIN}\n"
 
     show_summary
+    warn_eol_versions
     # remove_self
 }
 
