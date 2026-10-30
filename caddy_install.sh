@@ -11,7 +11,7 @@ CADDY_BIN="/usr/local/bin/caddy"
 CADDY_DIR="/etc/caddy"
 CADDY_FILE="${CADDY_DIR}/Caddyfile"
 CADDY_SERVICE="/etc/systemd/system/caddy.service"
-CADDY_URL="https://github.com/lxhao61/integrated-examples/releases/download/20261006/caddy-linux-amd64.tar.gz"
+CADDY_URL="https://github.com/lxhao61/integrated-examples/releases/download/20261024/caddy-linux-amd64.tar.gz"
 WEB_ROOT="/var/www/html"
 WEB_INDEX="${WEB_ROOT}/index.html"
 
